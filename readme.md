@@ -12,8 +12,8 @@
 % Here are the basic steps 
 % 1. We use the radiomics platform described above
 % 2. The radiomics platform blows up for very small image resolutions. So,
-% we simply trick it into thinking voxels sizes are 10x bigger (0.5 mm)
-% mm, and be VERY careful about converting units and dimensions. 
+% we simply trick it into thinking voxels sizes are bigger (i used 0.9ish mm for the simulations)
+% mm, and be careful about converting units and dimensions. 
 % 3. For resampled data, we average over superimposed voxels of the CT data
 % and the ROI
 % 4. The ROI and CT image files are stored in a dataformat as required in

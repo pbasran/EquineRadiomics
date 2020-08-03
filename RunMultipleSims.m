@@ -1,9 +1,22 @@
-% This code calls radiomics feature calcuations as developed by 
-%  Saeed Ashrafinia 
-% https://github.com/ashrafinia/SERA/tree/master/Data
-% All kudos goes to Saeed!
-
-
+%% FILENAME :         RunMultipleSims.m
+%
+% DESCRIPTION :
+%        This script runs a modified version of SERA.m, permitting the
+%        running of several radiomics calculations. It calls
+%        SERA_Main_uCT_CresswellSegementations.m
+%
+%
+% NOTES :
+%        You need to specify certain radiomics settings in the scrip below
+%        and it runs them. 
+%
+% AUTHOR :    Parminder S. Basran       START DATE :    05-Jan-2020
+%
+% CHANGES :
+%
+% REF NO  VERSION DATE    WHO     DETAIL
+%
+%
 clearvars;
 Rescale = 1; % Rescale =1 no rescaling, 0.05 works out to 0.099/0.05 mm = ~2 mm 
 SafePathFln='/Users/psb92/Sync/_current/research/CTEquineRadiomics/ProcessuCTData/CresswellSegmentation/Rescale1.00/isoVoxSize/'; 

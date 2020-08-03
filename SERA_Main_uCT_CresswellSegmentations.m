@@ -1,22 +1,3 @@
-%%
-% This code is adopted from Saeed Ashrafinia SERA_Main.m code
-% which runs the code. But in order to run multiple simulations, I created
-% an object Rd which could be defined, instead of hard-coded values, for
-% the SERA settings for radiomic calculations. This enables one to run
-% multiple simulations. 
-% Also different in this application is the resampling to accomodate the
-% very small voxel sizes in microCT. Using the original voxel sizes cause
-% the program to break (see readme.m)
-
-% https://github.com/ashrafinia/SERA/tree/master/Data
-% All kudos goes to Saeed!... header of the file is copy/pasted below
-% 
-% Parminder S. Basran
-% March 17, 2020
-
-
-
-
 % -------------------------------------------------------------------------
 % Standardized Environment for Radiomics Analysis (SERA)
 % Main code for calculating radiomics features based on protocols by IBSI 
@@ -57,6 +38,10 @@
 % - Creation: May 2016
 % - Revision: July 2018
 % - 1.3: Fix legendre for AEE calculation 
+% - Version modified to accomodate microCT equine PSB analysis (commented
+% out clearvars so it can be called multiple times from another script,
+% while allowing user to set Discretization type, bin size, voxel resample
+% size) PSBasran August 2019
 % -------------------------------------------------------------------------
 % STATEMENT:
 % This file is part of Standardized Environment for Radiomics Analysis
@@ -89,40 +74,40 @@ disp(['Selecting the ',dbsName,' dataset.']);
 
 %% Radiomics Framework Settings
 
-DiscType    = Rd.DiscType;        % Discretization type: either 'FBN' (fixed bin numbers) or 'FBS' (fixed bin size or fixed bin width). 
-BinSize = Rd.BinSize;             % [32]<=Default Number of bins (for FNB) or bin size (the size of each bin for FBS). It can be an array, and the features will be calculated for each NB or BS.
-isotVoxSize = Rd.isotVoxSize;            % New isotropic voxel size for resampling in 3D. This will be the new voxel size in X, Y and Z dimension. 
-isotVoxSize2D = Rd.isotVoxSize2D;          % New voxel size for resampling slices in 2D. This maintains the Z dimension, and rescales both X and Y to this number.
+DiscType    = DiscType;        % Discretization type: either 'FBN' (fixed bin numbers) or 'FBS' (fixed bin size or fixed bin width). 
+BinSize = BinSize;             % [32]<=Default Number of bins (for FNB) or bin size (the size of each bin for FBS). It can be an array, and the features will be calculated for each NB or BS.
+isotVoxSize = isotVoxSize;            % New isotropic voxel size for resampling in 3D. This will be the new voxel size in X, Y and Z dimension. 
+isotVoxSize2D = isotVoxSize2D;          % New voxel size for resampling slices in 2D. This maintains the Z dimension, and rescales both X and Y to this number.
 
-DataType    = Rd.DataType;         % Type of the dataset. Choose from 'PET', 'CT' or 'MRscan'
-VoxInterp   = Rd.VoxInterp;     % Image resampling interpolation type  ('nearest', 'linear', or 'cubic'). Note: 'cubic' yeilds inconsistensies with IBSI results. 
-ROIInterp   = Rd.ROIInterp;     % ROI resampling interpolation type  ('nearest', 'linear', or 'cubic'), default: 'linear'
+DataType    = CT;         % Type of the dataset. Choose from 'PET', 'CT' or 'MRscan'
+VoxInterp   = linear;     % Image resampling interpolation type  ('nearest', 'linear', or 'cubic'). Note: 'cubic' yeilds inconsistensies with IBSI results. 
+ROIInterp   = linear;     % ROI resampling interpolation type  ('nearest', 'linear', or 'cubic'), default: 'linear'
 
-isScale     = Rd.isScale;            % whether to do scaling. Has to be 1 to perform any resampling. If 0, always uses the original voxel dimension. 
-isGLround   = Rd.isGLround;            % whether to round voxel intensities to the nearest integer (usually =1 for CT images, =0 for PET and SPECT)
-isReSegRng  = Rd.isReSegRng;            % whether to perform range re-segmentation. The range is defined below in ReSegIntrvl. NOTE: Re-segmentation generally cannot be provided for arbitrary-unit modalities (MRI, SPECT)
-isOutliers  = Rd.isOutliers;            % whether to perform intensity outlier filtering re-segmentaion: remove outlier intensities from the intensity mask. If selected, voxels outside the range of +/- 3 standard deviation will be removed. 
-isQuntzStat = Rd.isQuntzStat;            % (default 1) whether to use quantized image to calculate first order statistical features. If 0, no image resample/interp for calculating statistical features. (0 is preferrable for PET images)
-isIsot2D    = Rd.isIsot2D;            % (default 0) whether to resample image to isotropic 2D voxels (=1, i.e.keep the original slice thickness) or resample to isotropic 3D voxels (=0). (This is for 1st order features. Higher order 2D features are always calculated with original slice thickness). 
+isScale     = 1;            % whether to do scaling. Has to be 1 to perform any resampling. If 0, always uses the original voxel dimension. 
+isGLround   = 1;            % whether to round voxel intensities to the nearest integer (usually =1 for CT images, =0 for PET and SPECT)
+isReSegRng  = 0;            % whether to perform range re-segmentation. The range is defined below in ReSegIntrvl. NOTE: Re-segmentation generally cannot be provided for arbitrary-unit modalities (MRI, SPECT)
+isOutliers  = 1;            % whether to perform intensity outlier filtering re-segmentaion: remove outlier intensities from the intensity mask. If selected, voxels outside the range of +/- 3 standard deviation will be removed. 
+isQuntzStat = 1;            % (default 1) whether to use quantized image to calculate first order statistical features. If 0, no image resample/interp for calculating statistical features. (0 is preferrable for PET images)
+isIsot2D    = 0;            % (default 0) whether to resample image to isotropic 2D voxels (=1, i.e.keep the original slice thickness) or resample to isotropic 3D voxels (=0). (This is for 1st order features. Higher order 2D features are always calculated with original slice thickness). 
 
-ReSegIntrvl = Rd.ReSegIntrvl;   % [0 400]<=default Range resegmentation interval. Intensity values outside this interval would be replaced by NaN. Default [-00 200]
-ROI_PV      = Rd.ROI_PV;          % (default 0.5) ROI partial volume threshold. Used to threshold ROI after resampling: i.e. ROI(ROI<ROI_PV) = 0, ROI(ROI>ROI_PV) = 1.
+ReSegIntrvl = ReSegIntrvl;   % [0 400]<=default Range resegmentation interval. Intensity values outside this interval would be replaced by NaN. Default [-00 200]
+ROI_PV      = 0.5;          % (default 0.5) ROI partial volume threshold. Used to threshold ROI after resampling: i.e. ROI(ROI<ROI_PV) = 0, ROI(ROI>ROI_PV) = 1.
 
-IVH_Type    = Rd.IVH_Type;            % Setting for Intensity Volume Histogram (IVH) Unit type={0: Definite(PET,CT), 1:Arbitrary(MRI,SPECT. This is FNB), 2: use 1000 bins, 3: use same discritization as histogram (for CT)} 
-IVH_DiscCont= Rd.IVH_DiscCont;            % Disc/Cont = {0:Discrete(for CT), 1:Continuous(for CT,PET. This is FBS)}, 
-IVH_binSize = Rd.IVH_binSize;          % Bin size for Intensity Volumen Histogram in case choosing setting 1 for FNB, or setting 0 and either IVH_DiscCont options.
-ROIsPerImg  = Rd.ROIsPerImg;            % "Maximum" number of ROIs per image. When having multiple patients, enter the largest number of ROIs across all patients. 
-isROIsCombined = Rd.isROIsCombined;         % Whether to combine ROIs for multiple tumors to one. 
+IVH_Type    = 3;            % Setting for Intensity Volume Histogram (IVH) Unit type={0: Definite(PET,CT), 1:Arbitrary(MRI,SPECT. This is FNB), 2: use 1000 bins, 3: use same discritization as histogram (for CT)} 
+IVH_DiscCont= 1;            % Disc/Cont = {0:Discrete(for CT), 1:Continuous(for CT,PET. This is FBS)}, 
+IVH_binSize = 2.5;          % Bin size for Intensity Volumen Histogram in case choosing setting 1 for FNB, or setting 0 and either IVH_DiscCont options.
+ROIsPerImg  = 1;            % "Maximum" number of ROIs per image. When having multiple patients, enter the largest number of ROIs across all patients. 
+isROIsCombined = 1;         % Whether to combine ROIs for multiple tumors to one. 
 
-Feats2out   = Rd.Feats2out;            % Select carefully! (default 2) which set of features to return: 1: all IBSI features, 2: 1st-order+all 3D features, 3: 1st-order+only 2D features, 4: 1st-order + selected 2D + all 3D features, 5: all features + moment invarient, 6: Custom set of feature classes should be defined in "ReturnFeatures.m"
+Feats2out   = 2;            % Select carefully! (default 2) which set of features to return: 1: all IBSI features, 2: 1st-order+all 3D features, 3: 1st-order+only 2D features, 4: 1st-order + selected 2D + all 3D features, 5: all features + moment invarient, 6: Custom set of feature classes should be defined in "ReturnFeatures.m"
 
-ImgFileName = Rd.ImgFileName;     % The filename that includes the image variable. It should be identical for all cases. Each case can be in a separate folder. 
-ROIFileName = Rd.ROIFileName;   % The filename that includes the ROI variable. It should be identical for all cases. Each case can be in a separate folder. 
+ImgFileName = 'imgs';       % The filename that includes the image variable. It should be identical for all cases. Each case can be in a separate folder. 
+ROIFileName = 'contours';   % The filename that includes the ROI variable. It should be identical for all cases. Each case can be in a separate folder. 
                             % !!!!!! Currently, the name of variables inside ImgFileName and ROIFileName are set as "vol_vals" and "total", respectively. 
                             % !!!!!! Make sure to set them under section "%% Verifying Image and ROI variable names"
                             
-ifSave      = Rd.ifSave;            % whether to save the results. Specify the target folder at the bottom of this file.                             
-qntz        = Rd.qntz;    % An extra option for FBN Discretization Type: Either 'Uniform' quantization or 'Lloyd' for Max-Lloyd quantization. (defualt: Uniform)
+ifSave      = 0;            % whether to save the results. Specify the target folder at the bottom of this file.                             
+qntz        = 'Uniform';    % An extra option for FBN Discretization Type: Either 'Uniform' quantization or 'Lloyd' for Max-Lloyd quantization. (defualt: Uniform)
 
 
 %% !!!! Make sure to check the following two sections below: 

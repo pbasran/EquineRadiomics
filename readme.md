@@ -25,9 +25,10 @@
 % 
 % ROIs were generated AFTER CT data was resampled.
 % 
-% If you run this code, please edit your paths and create your voxel.xlsx file.
+% If you run this code, please edit your paths and voxel.xlsx file.
 % 
-
+% Sample img and contour dataset to perform the radiomics calculations are available here:
+% https://ln2.sync.com/dl/2e511ea00/792wbsiu-rw3hy7hy-cddaksrm-3kunjr8w
 
 
 % Code used

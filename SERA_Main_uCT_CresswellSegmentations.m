@@ -64,7 +64,7 @@ dbsName = 'IBSI_CT';
 
 try
     %VoxelSizeInfo = xlsread([DataDir , '..\VoxelSizes\VoxelSizeInfo.xlsx']);
-    VoxelSizeInfo = xlsread('/Users/psb92/Sync/_current/research/CTEquineRadiomics/ProcessuCTData/VoxelSizes/VoxelSizeInfoRES.xlsx');
+    VoxelSizeInfo = xlsread('/Users/psb92/Documents/GitHub/EquineRadiomics/Cresswell_studykey2.xlsx','RadiomicsFileOrder');
     
 catch
     error('Error loading VoxelSizeInfo. Please make sure the Excel file name/path is correct, and you have Excell installed on your system.');

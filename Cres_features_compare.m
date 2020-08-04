@@ -31,8 +31,8 @@ Cthres = 0.90;       %r significance level, adjust as desired
 
 % Correction factors to ensure radiomic resolutions are correct (because one needs to scale the voxel dimensions to run the code)
 VolCF = 1.2500e-04; % Ran at '0.99836' instead of '0.049918', so vol needs to be scaled by (0.049918)^3 / (0.99836)^3  = 1.2500e-04
-AreaCF = 0.0025;    % Ran at '0.99836' instead of '0.049918', so vol needs to be scaled by (0.049918)^2 / (0.99836)^2  = 0.01
-DistCF = 0.05;      % Ran at '0.99836' instead of '0.049918', so vol needs to be scaled by 0.049918/0.99836  = 0.1
+AreaCF = 0.0025;    % Ran at '0.99836' instead of '0.049918', so area needs to be scaled by (0.049918)^2 / (0.99836)^2  = 0.00025
+DistCF = 0.05;      % Ran at '0.99836' instead of '0.049918', so distances needs to be scaled by 0.049918/0.99836  = 0.05
 
 %% Load the Cresswell dataset
 

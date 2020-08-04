@@ -37,6 +37,9 @@
 %
 % SERA_Main_uCT_CresswellSegmentations.m <=Is a severely edited version of
 % the SERA_Main.m code devised by Saeed (apologies!)
+%
+% Cress_features_compare.m is a script which analyzes features from the original Cresswell 
+% and compares them with image features from radiomics.
 
 % Datasets
 % IMG.zip contains all the image and ROI data separated into formats that
